@@ -1,0 +1,13 @@
+[debug]
+# 是否打开 
+Enable = true
+# 日志路径
+FileName = "log/log.debug"
+
+[info]
+Enable = true
+FileName = "log/log.info"
+
+[error]
+Enable = true
+FileName = "log/log.error"
