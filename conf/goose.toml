@@ -9,7 +9,7 @@ MaxProcs = 0
     # 建库数据库的相关配置
     [GooseBuild.DataBase]
     # 索引库的目标位置
-    DbPath = "data/goosedemo"
+    DbPath = "data/cse"
     # 正排转倒排的内存缓冲区最大容纳term数量.
     # 越大越好,减少读写磁盘数,随之内存占用越多.
     TransformMaxTermCnt = 10000000
