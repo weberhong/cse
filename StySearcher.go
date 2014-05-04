@@ -10,7 +10,6 @@ import (
     "runtime"
     log         "github.com/getwe/goose/log"
     simplejson  "github.com/bitly/go-simplejson"
-    darts       "github.com/awsong/go-darts"
     "sort"
     "fmt"
 )
@@ -27,7 +26,7 @@ type strategyData struct {
 type StySearcher struct {
     scws        *scws4go.Scws
 
-    trieDict    darts.Darts
+    trieDict    *TrieDict
 }
 
 // 全局调用一次初始化策略
