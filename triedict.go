@@ -24,13 +24,21 @@ type TrieDict struct {
     dict    *darts.Darts
 }
 
-func NewTrieDict(dictPath string) (*TrieDict,error) {
+// 先尝试加载encodeDictPath,如果失败,则读取dictPath明文词典
+func NewTrieDict(dictPath,encodeDictPath string) (*TrieDict,error) {
     td := TrieDict{}
 
     d,err := darts.Load(dictPath)
     if err != nil {
         log.Warn(err)
-        td.dict = nil
+
+        d,err = darts.Import(dictPath,encodeDictPath,false)
+        if err != nil {
+            log.Warn(err)
+            td.dict = nil
+        } else {
+            td.dict = &d
+        }
     } else {
         td.dict = &d
     }
