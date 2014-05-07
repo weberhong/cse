@@ -168,11 +168,21 @@ func (this StyIndexer) parseKeyword(document *simplejson.Json,termHash map[strin
 
 // 根据title,切词得到的term,权重因子计算term在doc中的重要性
 func (this StyIndexer) calTitleTermWei(title string,term scws4go.ScwsRes,boost float32) float32 {
-    return 0
+    wei := float32(len(term.Term)) / float32(len(title))
+    if term.Idf > 0 {
+        wei += float32(math.Log10(term.Idf))
+    }
+
+    return wei * boost
 }
 
-func (this StyIndexer) calKeywordTermWei(keyowrd string,term scws4go.ScwsRes,boost float32) float32 {
-    return 0
+func (this StyIndexer) calKeywordTermWei(keyword string,term scws4go.ScwsRes,boost float32) float32 {
+    wei := float32(len(term.Term)) / float32(len(keyword))
+    if term.Idf > 0 {
+        wei += float32(math.Log10(term.Idf))
+    }
+
+    return wei * boost
 }
 
 
