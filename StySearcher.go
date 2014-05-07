@@ -89,13 +89,18 @@ func (this *StySearcher) CalWeight(queryInfo interface{},inId InIdType,
     outId OutIdType,termInQuery []TermInQuery,termInDoc []TermInDoc,
     termCnt uint32,context *StyContext) (TermWeight,error) {
 
-    return 100,nil
+    queryMatch := this.queryMatch(inId,termInQuery,termInDoc)
+    docMatch := this.docMatch(inId,termInQuery,termInDoc)
+    omitPunish := this.omitTermPunish(inId,termInQuery,termInDoc)
+
+    weight := queryMatch * docMatch * omitPunish
+
+    return TermWeight( weight * 100 * 100 ),nil
 }
 // 对结果拉链进行过滤
 
 func (this *StySearcher) Filt(queryInfo interface{},list SearchResultList,
     context *StyContext) (error) {
-
     log.Debug("in Filt Strategy")
     return nil
 }
@@ -104,6 +109,14 @@ func (this *StySearcher) Filt(queryInfo interface{},list SearchResultList,
 // 确认最终结果列表排序
 func (this *StySearcher) Adjust(queryInfo interface{},list SearchResultList,
     db ValueReader,context *StyContext) (error) {
+    /*
+    type SearchResult struct {
+        InId    InIdType
+        OutId   OutIdType
+        Weight  TermWeight
+    }
+    */
+
 
     log.Debug("in Adjust Strategy")
     // 不调权,直接排序返回
