@@ -50,6 +50,11 @@ func (this *StySearcher) Init(conf config.Conf) (err error) {
     err = this.scws.Init(scwsForkCnt)
     if err != nil { return }
 
+    // treedict
+    trieDictDataPath := conf.String("Strategy.Searcher.TrieDict.DataFile")
+    trieDictPath := conf.String("Strategy.Searcher.TrieDict.DictFile")
+    this.trieDict,_ = NewTrieDict(trieDictDataPath,trieDictPath)
+
     return
 }
 

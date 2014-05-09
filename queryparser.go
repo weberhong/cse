@@ -42,8 +42,7 @@ func (this StySearcher) parseQuery(req *simplejson.Json,
     dictRes := this.trieDict.matchDict(styData.query)
     // 对每一段进行切词
     for _,s := range dictRes {
-        segResult,err := this.scws.Segment(
-            styData.query[s.Offset: s.Offset+s.Length])
+        segResult,err := this.scws.Segment(s.Section)
         if err != nil {
            log.Warn(err)
            continue
@@ -105,13 +104,14 @@ func (this StySearcher) calQueryTerm(context *StyContext,query string,
         termList[i].CanOmit = t.omit;
         termList[i].SkipOffset = true;
         //weight权值是[0,1]乘上MaxUint16保存,后续要用需要除于MaxUint16还原
-        termList[i].Weight = TermWeight((t.weight/weightsum)*math.MaxUint16)
+        wei := t.weight/weightsum
+        termList[i].Weight = TermWeight(wei*math.MaxUint16)
 
         {
-            context.Log.Debug("term[%s] omit[%b] weight[%0.4f]",
+            context.Log.Debug("term[%s] omit[%v] weight[%0.4f]",
                 strings.ToLower(t.term),
                 t.omit,
-                termList[i].Weight)
+                wei)
         }
     }
 

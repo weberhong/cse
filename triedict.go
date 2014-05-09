@@ -15,8 +15,7 @@ const (
 
 // trie词典查找结果
 type TrieDictResult struct {
-    Offset  int     // 在原串中的起始位置
-    Length  int     // 长度
+    Section string  //
     Attr    int     // 属性,cse支持的属性有SECTION_ATTR_*等几个
 }
 
@@ -28,7 +27,7 @@ type TrieDict struct {
 func NewTrieDict(dictPath,encodeDictPath string) (*TrieDict,error) {
     td := TrieDict{}
 
-    d,err := darts.Load(dictPath)
+    d,err := darts.Load(encodeDictPath)
     if err != nil {
         log.Warn(err)
 
@@ -53,7 +52,7 @@ func (this TrieDict) matchDict(query string) []TrieDictResult {
     // 没有初始化成功
     if this.dict == nil {
         // 把整个query当成一个未知段,效果差一点,程序还能跑
-        res = append(res,TrieDictResult{0,len(query),SECTION_ATTR_UNKNOWN})
+        res = append(res,TrieDictResult{query,SECTION_ATTR_UNKNOWN})
         return res
     }
 
@@ -67,9 +66,8 @@ func (this TrieDict) matchDict(query string) []TrieDictResult {
         r := this.dict.CommonPrefixSearch(key[pos:], 0)
         if len(r) > 0 {
             if pos != lastMatchPos {
-                offset := lastMatchPos
-                matchlen := pos - lastMatchPos
-                res = append(res,TrieDictResult{offset,matchlen,SECTION_ATTR_UNKNOWN})
+                section := string(key[lastMatchPos:pos])
+                res = append(res,TrieDictResult{section,SECTION_ATTR_UNKNOWN})
             }
 
             maxlen := 0
@@ -82,7 +80,8 @@ func (this TrieDict) matchDict(query string) []TrieDictResult {
             }
             offset := pos
             matchlen := r[maxlenindex].PrefixLen
-            res = append(res,TrieDictResult{offset,matchlen,r[maxlenindex].Freq})
+            section := string(key[offset:offset+matchlen])
+            res = append(res,TrieDictResult{section,r[maxlenindex].Freq})
             pos = pos + maxlen
             lastMatchPos = pos
         } else {
@@ -90,9 +89,7 @@ func (this TrieDict) matchDict(query string) []TrieDictResult {
         }
     }
     if pos != lastMatchPos {
-        offset := lastMatchPos
-        matchlen := pos - lastMatchPos
-        res = append(res,TrieDictResult{offset,matchlen,SECTION_ATTR_UNKNOWN})
+        res = append(res,TrieDictResult{query,SECTION_ATTR_UNKNOWN})
     }
 
     return res

@@ -15,42 +15,38 @@ import (
 func (this StyIndexer) parseValue(document *simplejson.Json) (Value,error) {
     // NewValue(len,cap)
     value := NewValue(int(this.valueSize),int(this.valueSize))
+    return value,nil
 
-    arr,err := document.Get("cse_value").Array()
-    if err != nil {
-        return value,log.Warn("get cse_value fail : %s",err)
-    }
-
-    if len(arr) == 0 {
-        return value,log.Warn("cse_value size 0")
-    }
+    valueObj := document.Get("cse_value")
 
     order := binary.BigEndian
     // 第一个数字是聚类id,占用4个字节
-    clusterid,ok := arr[0].(uint32)
-    if ok {
-        order.PutUint32(value[0:4],clusterid)
-    } else {
+    clusterid,err := valueObj.GetIndex(0).Int()
+    if err != nil {
         return nil,log.Warn("cse_value[0] not a int32 num")
+    } else {
+        order.PutUint32(value[0:4],uint32(clusterid))
     }
 
     // 剩下空间用于写入调权字段
     value = value[5:]
-    arr = arr[1:]
 
-    if len(arr) > len(value) {
-        log.Warn("cse_value array too long,conf.valueSize[%d]",this.valueSize)
-        // 再次进行截断,丢弃多余的调权字段
-        arr = arr[:len(value)]
-    }
-    // 剩下的每一个数字占用一个字节
-    for i,e := range arr {
-        num,ok := e.(uint32)
-        if !ok || num > math.MaxUint8 {
+    // 最多可以写入的value
+    for i:=0;i<len(value);i++ {
+        num,err := valueObj.GetIndex(i+1).Int()
+        if err != nil {
+            // 拿出来不是数字
+            // 数组遍历完
+            // 都走这里的逻辑
+            break
+        }
+
+        if num > math.MaxUint8 {
             // 不是数字,或者数字太大,抛失败吧,让这条记录建库失败以尽早发现问题
             return nil,log.Warn("cse_value[%d] error",i+1)
         }
-        value[i] = byte(num)
+
+       value[i] = byte(num)
     }
 
     return value,nil
