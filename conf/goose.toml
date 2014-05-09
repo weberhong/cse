@@ -29,7 +29,7 @@ MaxProcs = 0
     # 检索相关配置
     [GooseSearch.Search]
     # 检索并发协程数
-    GoroutineNum = 100
+    GoroutineNum = 1
     # 检索服务端口
     ServerPort = 7788
     # 接受请求的网络缓冲区(byte)
@@ -71,4 +71,12 @@ MaxProcs = 0
         [Strategy.Searcher.Scws]
         xdbdict = "dict/dict.utf8.xdb"
         rules = "dict/rules.utf8.ini"
+
+        # 专名词典
+        [Strategy.Searcher.TrieDict]
+        # 先加载DictFile,如果加载失败,则读取DataFile转化为DictFile
+        DataFile = "dict/name.txt"
+        DictFile = "dict/name.dict"
+
+
 
