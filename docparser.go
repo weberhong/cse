@@ -15,7 +15,6 @@ import (
 func (this StyIndexer) parseValue(document *simplejson.Json) (Value,error) {
     // NewValue(len,cap)
     value := NewValue(int(this.valueSize),int(this.valueSize))
-    return value,nil
 
     valueObj := document.Get("cse_value")
 
@@ -29,9 +28,10 @@ func (this StyIndexer) parseValue(document *simplejson.Json) (Value,error) {
     }
 
     // 剩下空间用于写入调权字段
-    value = value[5:]
+    advalue := value[5:]
 
     // 最多可以写入的value
+    cse_value_length := uint8(1)
     for i:=0;i<len(value);i++ {
         num,err := valueObj.GetIndex(i+1).Int()
         if err != nil {
@@ -46,7 +46,18 @@ func (this StyIndexer) parseValue(document *simplejson.Json) (Value,error) {
             return nil,log.Warn("cse_value[%d] error",i+1)
         }
 
-       value[i] = byte(num)
+       advalue[i] = byte(num)
+       cse_value_length++
+    }
+
+    // value截掉多余元素
+    advalue = advalue[:cse_value_length-1]
+    value = value[:len(advalue)+4]
+
+    if cse_value_length != this.adjustWeightFieldCount + 1 {
+        return nil,log.Warn("cse_value : clusterid[%d] %v length illegal," +
+            "AdjustWeightFieldCount is [%d]",
+            clusterid,advalue,this.adjustWeightFieldCount)
     }
 
     return value,nil

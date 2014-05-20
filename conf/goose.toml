@@ -51,6 +51,17 @@ MaxProcs = 0
 
 
 [Strategy]
+
+# 调权字段个数
+# 意味着输入doc的cse_value数组的元素个数必须是AdjustWeightFieldCount + 1
+# 第一个元素是clusterid,剩下的是调权字段
+# 另外ValueBoost的长度也必须是AdjustWeightFieldCount
+# 表示每个字段生效的权重
+AdjustWeightFieldCount = 6
+# 调权参数的权重
+ValueBoost = [0.0003,0.0008,0.0005,0.0003,0.0009,0.0008]
+
+
     # 建库策略
     [Strategy.Indexer]
         # 切词词典
@@ -63,8 +74,7 @@ MaxProcs = 0
         MainTitleBoost = 1.0
         TitleBoost = 0.8
         KeyWordBoost = 0.9
-     
-
+    
     # 检索策略
     [Strategy.Searcher]
         # 切词词典
@@ -77,6 +87,4 @@ MaxProcs = 0
         # 先加载DictFile,如果加载失败,则读取DataFile转化为DictFile
         DataFile = "dict/name.txt"
         DictFile = "dict/name.dict"
-
-
 

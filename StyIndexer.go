@@ -18,7 +18,12 @@ type StyIndexer struct {
     scws    *scws4go.Scws
 
     // 共用的只读配置信息
+
+    // value内存块大小
     valueSize   uint8
+
+    // 调权字段个数
+    adjustWeightFieldCount uint8
 
     // 各个检索字段权重
     mainTitleBoost float32
@@ -101,10 +106,18 @@ func (this *StyIndexer) Init(conf config.Conf) (err error) {
             "at least 4",this.valueSize)
     }
 
+    // AdjustWeightFieldCount
+    this.adjustWeightFieldCount = uint8(conf.Int64("Strategy.AdjustWeightFieldCount"))
+    if this.adjustWeightFieldCount == 0 ||
+        this.adjustWeightFieldCount + 4 > this.valueSize {
+        return log.Error("AdjustWeightFieldCount[%d] out of limit. ValueSize[%d]",
+            this.adjustWeightFieldCount,this.valueSize)
+    }
+
     // Weight boost
     this.mainTitleBoost = float32(conf.Float64("Strategy.Indexer.Weight.MainTitleBoost"))
     this.titleBoost = float32(conf.Float64("Strategy.Indexer.Weight.TitleBoost"))
-    this.keywordBoost = float32(conf.Float64("Strategy.Indexer.Weight.KeywordBoost"))
+    this.keywordBoost = float32(conf.Float64("Strategy.Indexer.Weight.KeyWordBoost"))
     if this.mainTitleBoost == 0.0 || this.titleBoost == 0.0 || 
         this.keywordBoost == 0.0 {
         log.Warn("index weight conf mainTitleBoost[%f] titleBoost[%f] keywordBoost[%f]",

@@ -27,6 +27,11 @@ type StySearcher struct {
     scws        *scws4go.Scws
 
     trieDict    *TrieDict
+
+    // 调权字段个数
+    adjustWeightFieldCount uint8
+
+    valueBoost  []float64
 }
 
 // 全局调用一次初始化策略
@@ -54,6 +59,20 @@ func (this *StySearcher) Init(conf config.Conf) (err error) {
     trieDictDataPath := conf.String("Strategy.Searcher.TrieDict.DataFile")
     trieDictPath := conf.String("Strategy.Searcher.TrieDict.DictFile")
     this.trieDict,_ = NewTrieDict(trieDictDataPath,trieDictPath)
+
+    // AdjustWeightFieldCount
+    this.adjustWeightFieldCount = uint8(conf.Int64("Strategy.AdjustWeightFieldCount"))
+    if this.adjustWeightFieldCount == 0 {
+        return log.Error("AdjustWeightFieldCount[%d] illegal",
+            this.adjustWeightFieldCount)
+    }
+
+    // valueBoost 调权参数权重
+    this.valueBoost = conf.Float64Array("Strategy.ValueBoost")
+    if len(this.valueBoost) != int(this.adjustWeightFieldCount) {
+        return log.Error("ValueBoost %v length illegal,AdjustWeightFieldCount[%d]",
+            this.valueBoost,this.adjustWeightFieldCount)
+    }
 
     return
 }
@@ -102,36 +121,51 @@ func (this *StySearcher) CalWeight(queryInfo interface{},inId InIdType,
 
     return TermWeight( weight * 100 * 100 ),nil
 }
-// 对结果拉链进行过滤
 
-func (this *StySearcher) Filt(queryInfo interface{},list SearchResultList,
-    context *StyContext) (error) {
-    log.Debug("in Filt Strategy")
-    return nil
-}
-
-// 结果调权
-// 确认最终结果列表排序
-func (this *StySearcher) Adjust(queryInfo interface{},list SearchResultList,
-    db ValueReader,context *StyContext) (error) {
+// 构建返回包
+func (this *StySearcher) Response(queryInfo interface{},
+    list SearchResultList,
+    valueReader ValueReader,
+    dataReader DataReader,
+    response []byte,context *StyContext) (reslen int,err error) {
     /*
+    // from goose
     type SearchResult struct {
         InId    InIdType
         OutId   OutIdType
         Weight  TermWeight
     }
     */
+    // 策略自己定义的拉链
+    stylist := make([]csedoc,0,len(list))
+    for _,e := range list {
+        stylist = append(stylist,csedoc{
+            InId : e.InId,
+            OutId : e.OutId,
+            Bweight : int(e.Weight),
+        })
+    }
 
+    // 对拉链加载解析Value ( 应该是耗时操作 )
+    for i:=0;i<len(stylist);i++ {
+        stylist[i].ParseValue(valueReader,this.valueBoost)
+    }
 
-    log.Debug("in Adjust Strategy")
-    // 不调权,直接排序返回
-    sort.Sort(list)
-    return nil
+    // 类聚去重
+    // 先排序整理,按clusterid聚成块
+    sort.Sort(GroupByClusterId{stylist})
+    // TODO
+
+    // 根据Weight做最终排序
+    sort.Sort(WeightSort{stylist})
+
+    return this.buildRes(queryInfo,stylist,dataReader,response,context)
 }
 
+
 // 构建返回包
-func (this *StySearcher) Response(queryInfo interface{},list SearchResultList,
-    db DataBaseReader,response []byte,context *StyContext) (reslen int,err error) {
+func (this *StySearcher) buildRes(queryInfo interface{},list csedocarray,
+    db DataReader,response []byte,context *StyContext) (reslen int,err error) {
     log.Debug("in Response Strategy")
 
     styData := queryInfo.(*strategyData)
@@ -168,9 +202,16 @@ func (this *StySearcher) Response(queryInfo interface{},list SearchResultList,
         doc,err := simplejson.NewJson(tmpData)
         if err != nil {
             context.Log.Warn(err)
-        } else {
-            searchRes.Set(fmt.Sprintf("result%d",i),doc)
+            continue
         }
+
+        weightInfo,_ := simplejson.NewJson([]byte(`{}`))
+        weightInfo.Set("bweight",e.Bweight)
+        weightInfo.Set("weight",e.Weight)
+
+        doc.Set("weightInfo",weightInfo)
+
+        searchRes.Set(fmt.Sprintf("result%d",i),doc)
     }
 
     searchRes.Set("retNum",len(relist))

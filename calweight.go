@@ -37,6 +37,10 @@ func (this *StySearcher) queryMatch(inId InIdType,termInQuery []TermInQuery,
         qm += ( float32(q.Weight) / math.MaxUint16 ) * radio[i]
     }
 
+    if qm > 1.0 {
+        qm = 1.0
+    }
+
     return qm
 }
 
@@ -59,6 +63,10 @@ func (this *StySearcher) docMatch(inId InIdType,termInQuery []TermInQuery,
 
         wei = wei * 0.8 + t.KeyWordWeight * 0.2
         dm += wei
+    }
+
+    if dm > 1.0 {
+        dm = 1.0
     }
 
     return dm
