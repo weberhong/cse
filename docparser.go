@@ -28,7 +28,7 @@ func (this StyIndexer) parseValue(document *simplejson.Json) (Value,error) {
     }
 
     // 剩下空间用于写入调权字段
-    advalue := value[5:]
+    advalue := value[4:]
 
     // 最多可以写入的value
     cse_value_length := uint8(1)

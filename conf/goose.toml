@@ -20,7 +20,7 @@ MaxProcs = 0
     # Data文件最大文件大小,单位(B),1G = 1073741824B
     MaxDataFileSize = 1073741824
     # 每个doc的Value大小,单位(B)
-    ValueSize = 32
+    ValueSize = 16
 
 [GooseSearch]
 # 检索最多使用cpu个数.0表示设置为机器的cpu数
@@ -59,7 +59,7 @@ MaxProcs = 0
 # 表示每个字段生效的权重
 AdjustWeightFieldCount = 6
 # 调权参数的权重
-ValueBoost = [0.0003,0.0008,0.0005,0.0003,0.0009,0.0008]
+ValueBoost = [0.03,0.08,0.05,0.03,0.10,0.15]
 
 
     # 建库策略

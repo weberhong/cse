@@ -111,13 +111,15 @@ func (this *csedoc) ParseValue(reader ValueReader,valueBoost []float64) error {
     for i:=0;i<valueArrLen;i++ {
         this.AdjustValue[i] = float64(value[i+4])
     }
+    log.Debug("inid[%d] outid[%d] clusterid[%d] value%v AdjustValue%v",
+        this.InId,this.OutId,this.ClusterId,value,this.AdjustValue)
 
     // 进行调权
     this.Weight = this.Bweight
     for i:=0;i<valueArrLen;i++ {
-        w := float64(this.Bweight) * this.AdjustValue[i] * valueBoost[i]
+        w := float64(this.Bweight) * this.AdjustValue[i] * valueBoost[i] * 0.01
         this.Weight += int(w)
-        log.Debug("adjustWei[%d] = bweight[%d]*adjustvalue[%.3f]*boost[%.3f]",
+        log.Debug("adjustWei[%d] = bweight[%d]*adjustvalue[%.3f]*boost[%.3f]*0.01",
             int(w),this.Bweight,this.AdjustValue[i],valueBoost[i])
     }
 
