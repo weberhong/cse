@@ -89,7 +89,8 @@ func (this TrieDict) matchDict(query string) []TrieDictResult {
         }
     }
     if pos != lastMatchPos {
-        res = append(res,TrieDictResult{query,SECTION_ATTR_UNKNOWN})
+        section := string(key[lastMatchPos:])
+        res = append(res,TrieDictResult{section,SECTION_ATTR_UNKNOWN})
     }
 
     return res
