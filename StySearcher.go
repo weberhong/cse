@@ -73,6 +73,7 @@ func (this *StySearcher) Init(conf config.Conf) (err error) {
         return log.Error("ValueBoost %v length illegal,AdjustWeightFieldCount[%d]",
             this.valueBoost,this.adjustWeightFieldCount)
     }
+    log.Debug("Strategy.ValueBoost : %v",this.valueBoost)
 
     return
 }

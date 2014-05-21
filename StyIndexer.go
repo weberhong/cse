@@ -56,9 +56,11 @@ func (this *StyIndexer) ParseDoc(doc interface{},context *goose.StyContext) (
     }
     // outid
     outId = OutIdType(cse_docid)
+    context.Log.Info("outId",outId)
 
     // write termInDoc
     termList,err = this.parseTerm(document)
+    context.Log.Info("termCount",len(termList))
 
     // write value
     value,err = this.parseValue(document)
