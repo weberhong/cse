@@ -33,6 +33,8 @@ func (this StySearcher) parseQuery(req *simplejson.Json,
     }
     styData.pn = req.Get("pn").MustInt(0)
     styData.rn = req.Get("rn").MustInt(10)
+    styData.isdebug = req.Get("isdebug").MustBool(false)
+    styData.debug = NewDebug(styData.isdebug)
 
     context.Log.Info("query",styData.query)
 
@@ -52,19 +54,20 @@ func (this StySearcher) parseQuery(req *simplejson.Json,
                 attr : s.Attr,// term的属性取的是trie的配置,而不是scws4go自带
                 idf : t.Idf,
                 term : t.Term})
+            log.Debug("section[%s] term[%s]",s.Section,t.Term)
         }
 
     }
-    return this.calQueryTerm(context,styData.query,termarr)
+    return this.calQueryTerm(context,styData,termarr)
 }
 
 
 // 根据Query,Query的切词结果,Query在trie词典的匹配情况以及查找到的属性
 // 计算term重要性,是否可省
-func (this StySearcher) calQueryTerm(context *StyContext,query string,
+func (this StySearcher) calQueryTerm(context *StyContext,styData *strategyData,
     termarr []queryTerm) ([]TermInQuery,error) {
 
-    querylen := float32(len(query))
+    querylen := float32(len(styData.query))
 
     weightsum := float32(0.0)
 
@@ -110,6 +113,12 @@ func (this StySearcher) calQueryTerm(context *StyContext,query string,
         {
             context.Log.Debug("term[%s] omit[%v] weight[%0.4f]",
                 strings.ToLower(t.term),
+                t.omit,
+                wei)
+
+            styData.debug.AddDebugInfo("term[%s] attr[%d] omit[%v] weight[%0.4f]",
+                strings.ToLower(t.term),
+                t.attr,
                 t.omit,
                 wei)
         }

@@ -19,6 +19,10 @@ type strategyData struct {
     query   string
     pn      int
     rn      int
+
+    isdebug  bool
+
+    debug   *Debug
 }
 
 // 检索的时候,goose框架收到一个完整的网络请求便认为是一次检索请求.
@@ -114,11 +118,20 @@ func (this *StySearcher) CalWeight(queryInfo interface{},inId InIdType,
     outId OutIdType,termInQuery []TermInQuery,termInDoc []TermInDoc,
     termCnt uint32,context *StyContext) (TermWeight,error) {
 
-    queryMatch := this.queryMatch(inId,termInQuery,termInDoc)
-    docMatch := this.docMatch(inId,termInQuery,termInDoc)
-    omitPunish := this.omitTermPunish(inId,termInQuery,termInDoc)
+    styData := queryInfo.(*strategyData)
+    if styData == nil {
+        return 0,errors.New("StrategyData nil")
+    }
+
+    queryMatch := this.queryMatch(styData,inId,termInQuery,termInDoc)
+    docMatch := this.docMatch(styData,inId,termInQuery,termInDoc)
+    omitPunish := this.omitTermPunish(styData,inId,termInQuery,termInDoc)
 
     weight := queryMatch * docMatch * omitPunish
+
+    styData.debug.AddDocDebugInfo(uint32(inId),
+        "bweight[%.3f] = queryMatch[%.3f] * docMatch[%.3f] * omitPunish[%.3f]",
+        weight,queryMatch,docMatch,omitPunish)
 
     return TermWeight( weight * 100 * 100 ),nil
 }
@@ -206,12 +219,21 @@ func (this *StySearcher) buildRes(queryInfo interface{},list csedocarray,
             continue
         }
 
+        // ------------------------------------------------
         weightInfo,_ := simplejson.NewJson([]byte(`{}`))
         weightInfo.Set("bweight",e.Bweight)
         weightInfo.Set("weight",e.Weight)
 
         doc.Set("weightInfo",weightInfo)
+        // ------------------------------------------------
+        if styData.isdebug {
+            debugInfo,_ := simplejson.NewJson([]byte(`{}`))
+            debugInfo.Set("docDebugLog",styData.debug.GetDocDebugInfo(uint32(e.InId)))
 
+            doc.Set("debugInfo",debugInfo)
+        }
+
+        // ------------------------------------------------
         searchRes.Set(fmt.Sprintf("result%d",i),doc)
     }
 
@@ -220,6 +242,13 @@ func (this *StySearcher) buildRes(queryInfo interface{},list csedocarray,
 
     context.Log.Info("retNum",len(relist))
     context.Log.Info("dispNum",len(list))
+
+    if styData.isdebug {
+        debug,_ := simplejson.NewJson([]byte(`{}`))
+        debug.Set("queryDebugLog",styData.debug.GetDebugInfo())
+
+        searchRes.Set("debugInfo",debug)
+    }
 
     // 进行序列化
     tmpbuf,err := searchRes.Encode()
