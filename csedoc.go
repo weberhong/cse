@@ -87,7 +87,7 @@ func (v GroupByClusterId) Less(i,j int) bool {
 
 // 读取Value,根据策略的设计解析数据
 // 解析得到ClusterId和AdjustValue数组,同时完成调权计算得到Weight
-func (this *csedoc) ParseValue(reader ValueReader,valueBoost []float64) error {
+func (this *csedoc) ParseValue(styData *strategyData,reader ValueReader,valueBoost []float64) error {
     valueArrLen := len(valueBoost)
 
     value,err := reader.ReadValue(this.InId)
@@ -111,15 +111,18 @@ func (this *csedoc) ParseValue(reader ValueReader,valueBoost []float64) error {
     for i:=0;i<valueArrLen;i++ {
         this.AdjustValue[i] = float64(value[i+4])
     }
+    /*
     log.Debug("inid[%d] outid[%d] clusterid[%d] value%v AdjustValue%v",
         this.InId,this.OutId,this.ClusterId,value,this.AdjustValue)
+    */
 
     // 进行调权
     this.Weight = this.Bweight
     for i:=0;i<valueArrLen;i++ {
         w := float64(this.Bweight) * this.AdjustValue[i] * valueBoost[i] * 0.01
         this.Weight += int(w)
-        log.Debug("adjustWei[%d] = bweight[%d]*adjustvalue[%.3f]*boost[%.3f]*0.01",
+        styData.debug.AddDocDebugInfo(uint32(this.InId),
+            "adjustWei[%d] = bweight[%d]*adjustvalue[%.3f]*boost[%.3f]*0.01",
             int(w),this.Bweight,this.AdjustValue[i],valueBoost[i])
     }
 

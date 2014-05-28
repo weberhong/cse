@@ -180,7 +180,7 @@ func (this StyIndexer) calTitleTermWei(title string,term scws4go.ScwsRes,boost f
         wei += float32(math.Log10(term.Idf))
     }
 
-    return wei * boost
+    return wei * boost * 0.5
 }
 
 func (this StyIndexer) calKeywordTermWei(keyword string,term scws4go.ScwsRes,boost float32) float32 {
@@ -189,7 +189,7 @@ func (this StyIndexer) calKeywordTermWei(keyword string,term scws4go.ScwsRes,boo
         wei += float32(math.Log10(term.Idf))
     }
 
-    return wei * boost
+    return wei * boost * 0.5
 }
 
 

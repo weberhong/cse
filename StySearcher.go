@@ -150,6 +150,12 @@ func (this *StySearcher) Response(queryInfo interface{},
         Weight  TermWeight
     }
     */
+
+    styData := queryInfo.(*strategyData)
+    if styData == nil {
+        return 0,errors.New("StrategyData nil")
+    }
+
     // 策略自己定义的拉链
     stylist := make([]csedoc,0,len(list))
     for _,e := range list {
@@ -162,7 +168,7 @@ func (this *StySearcher) Response(queryInfo interface{},
 
     // 对拉链加载解析Value ( 应该是耗时操作 )
     for i:=0;i<len(stylist);i++ {
-        stylist[i].ParseValue(valueReader,this.valueBoost)
+        stylist[i].ParseValue(styData,valueReader,this.valueBoost)
     }
 
     // 类聚去重
@@ -173,19 +179,14 @@ func (this *StySearcher) Response(queryInfo interface{},
     // 根据Weight做最终排序
     sort.Sort(WeightSort{stylist})
 
-    return this.buildRes(queryInfo,stylist,dataReader,response,context)
+    return this.buildRes(styData,stylist,dataReader,response,context)
 }
 
 
 // 构建返回包
-func (this *StySearcher) buildRes(queryInfo interface{},list csedocarray,
+func (this *StySearcher) buildRes(styData *strategyData,list csedocarray,
     db DataReader,response []byte,context *StyContext) (reslen int,err error) {
     log.Debug("in Response Strategy")
-
-    styData := queryInfo.(*strategyData)
-    if styData == nil {
-        return 0,errors.New("StrategyData nil")
-    }
 
     // 分页
     begin := styData.pn * styData.rn
