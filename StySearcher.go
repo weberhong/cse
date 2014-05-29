@@ -190,6 +190,9 @@ func (this *StySearcher) buildRes(styData *strategyData,list csedocarray,
 
     // 分页
     begin := styData.pn * styData.rn
+    if begin > len(list) {
+        begin = len(list)
+    }
     end := begin + styData.rn
     if end > len(list) {
         end = len(list)

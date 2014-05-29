@@ -37,6 +37,8 @@ func (this StySearcher) parseQuery(req *simplejson.Json,
     styData.debug = NewDebug(styData.isdebug)
 
     context.Log.Info("query",styData.query)
+    context.Log.Info("pn",styData.pn)
+    context.Log.Info("rn",styData.rn)
 
     termarr := make([]queryTerm,0)
     // 先对query进行分段
