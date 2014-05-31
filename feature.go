@@ -21,6 +21,15 @@ func (t *termDocFeature) encode() TermWeight {
     order := binary.BigEndian
 
     buf := make([]byte,4)
+    if t.MainTitleWeight > 1.0 {
+        t.MainTitleWeight = 1.0
+    }
+    if t.TitleWeight > 1.0 {
+        t.TitleWeight = 1.0
+    }
+    if t.KeyWordWeight > 1.0 {
+        t.KeyWordWeight = 1.0
+    }
     buf[0] = byte(t.MainTitleWeight * math.MaxUint8)
     buf[1] = byte(t.TitleWeight     * math.MaxUint8)
     buf[2] = byte(t.KeyWordWeight   * math.MaxUint8)
