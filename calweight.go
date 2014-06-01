@@ -68,11 +68,33 @@ func (this *StySearcher) docMatch(styData *strategyData,inId InIdType,termInQuer
             wei = t.TitleWeight
         }
 
-        rwei := wei * 0.8 + t.KeyWordWeight * 0.2
+        var titleBoost float32
+        var keywordBoost float32
+
+        switch termInQuery[i].Attr {
+        // term属于专名的一部分,命中title很重要,命中keyword也应该适当加分
+        case SECTION_ATTR_NAME:
+            titleBoost = 1.0
+            keywordBoost = 0.2
+        // term属于keyword,应该更多考察keyword的命中程度
+        case SECTION_ATTR_KEYWORD:
+            fallthrough
+        case SECTION_ATTR_KEYWORD_OMIT:
+            titleBoost = 0.4
+            keywordBoost = 1.0
+        // 未知的词,更倾向于考察title的命中情况
+        case SECTION_ATTR_UNKNOWN:
+            fallthrough
+        case SECTION_ATTR_OMIT:
+            titleBoost = 0.9
+            keywordBoost = 0.2
+        }
+
+        rwei := wei * titleBoost + t.KeyWordWeight * keywordBoost
 
         styData.debug.AddDocDebugInfo(uint32(inId),
-            "docMatch t%d [%.3f] = title[%.3f]*0.8+keyword[%.3f]*0.2",
-            i,rwei,wei,t.KeyWordWeight)
+            "docMatch t%d [%.3f] = title[%.3f]*%.2f+keyword[%.3f]*%.2f",
+            i,rwei,wei,titleBoost,t.KeyWordWeight,keywordBoost)
 
         dm += rwei
     }

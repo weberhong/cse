@@ -59,7 +59,7 @@ MaxProcs = 0
 # 表示每个字段生效的权重
 AdjustWeightFieldCount = 6
 # 调权参数的权重
-ValueBoost = [0.03,0.08,0.05,0.03,0.10,0.15]
+ValueBoost = [0.03,0.08,0.05,0.03,0.10,1.00]
 
 
     # 建库策略

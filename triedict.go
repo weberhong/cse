@@ -6,10 +6,11 @@ import (
 )
 
 const (
-    SECTION_ATTR_UNKNOWN = 0 // 未知片段,在词典找不到匹配时的默认值
-    SECTION_ATTR_NAME    = 1 // 专名,比较重要的片段
-    SECTION_ATTR_KEYWORD = 2 // 关键词,也很重要
-    SECTION_ATTR_OMIT    = 3 // 可省词,在这个检索系统中可有可无
+    SECTION_ATTR_UNKNOWN        = 0 // 未知片段,在词典找不到匹配时的默认值
+    SECTION_ATTR_NAME           = 1 // 专名,比较重要的片段
+    SECTION_ATTR_KEYWORD        = 2 // 关键词,也很重要,不可省略
+    SECTION_ATTR_KEYWORD_OMIT   = 3 // 关键词,也很重要,但是可省
+    SECTION_ATTR_OMIT           = 10 // 可省词,在这个检索系统中可有可无
 )
 
 

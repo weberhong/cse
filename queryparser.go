@@ -91,6 +91,9 @@ func (this StySearcher) calQueryTerm(context *StyContext,styData *strategyData,
         case SECTION_ATTR_KEYWORD:
             termarr[i].weight *= 1.1
             termarr[i].omit = false
+        case SECTION_ATTR_KEYWORD_OMIT:
+            termarr[i].weight *= 1.0
+            termarr[i].omit = true
         case SECTION_ATTR_OMIT:
             // 可省词降低权重
             termarr[i].weight *= 0.1
@@ -108,6 +111,7 @@ func (this StySearcher) calQueryTerm(context *StyContext,styData *strategyData,
         termList[i].Sign = TermSign(StringSignMd5(strings.ToLower(t.term)))
         termList[i].CanOmit = t.omit;
         termList[i].SkipOffset = true;
+        termList[i].Attr = uint32(t.attr)
         //weight权值是[0,1]乘上MaxUint16保存,后续要用需要除于MaxUint16还原
         wei := t.weight/weightsum
         termList[i].Weight = TermWeight(wei*math.MaxUint16)

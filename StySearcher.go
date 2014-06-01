@@ -217,11 +217,15 @@ func (this *StySearcher) buildRes(styData *strategyData,list csedocarray,
 
         context.Log.Debug("inId[%d] weight[%d]",e.InId,e.Weight)
 
-        doc,err := simplejson.NewJson(tmpData)
+        doc,_ := simplejson.NewJson([]byte(`{}`))
+
+        // ------------------------------------------------
+        data,err := simplejson.NewJson(tmpData)
         if err != nil {
             context.Log.Warn(err)
             continue
         }
+        doc.Set("cse_data",data)
 
         // ------------------------------------------------
         weightInfo,_ := simplejson.NewJson([]byte(`{}`))
