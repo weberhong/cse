@@ -110,8 +110,7 @@ func (this *StyIndexer) Init(conf config.Conf) (err error) {
 
 	// AdjustWeightFieldCount
 	this.adjustWeightFieldCount = uint8(conf.Int64("Strategy.AdjustWeightFieldCount"))
-	if this.adjustWeightFieldCount == 0 ||
-		this.adjustWeightFieldCount+4 > this.valueSize {
+	if this.adjustWeightFieldCount+4 > this.valueSize {
 		return log.Error("AdjustWeightFieldCount[%d] out of limit. ValueSize[%d]",
 			this.adjustWeightFieldCount, this.valueSize)
 	}

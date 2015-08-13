@@ -72,10 +72,13 @@ func (this *StySearcher) Init(conf config.Conf) (err error) {
 
 	// AdjustWeightFieldCount
 	this.adjustWeightFieldCount = uint8(conf.Int64("Strategy.AdjustWeightFieldCount"))
-	if this.adjustWeightFieldCount == 0 {
-		return log.Error("AdjustWeightFieldCount[%d] illegal",
-			this.adjustWeightFieldCount)
-	}
+	/*
+		// 允许没有调权
+		if this.adjustWeightFieldCount == 0 {
+			return log.Error("AdjustWeightFieldCount[%d] illegal",
+				this.adjustWeightFieldCount)
+		}
+	*/
 
 	// valueBoost 调权参数权重
 	this.valueBoost = conf.Float64Array("Strategy.ValueBoost")
