@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+command -v supervisord >/dev/null 2>&1 || {
+  echo "Command not found : supervisord"
+  echo "Please install supervisor : pip install supervisor"
+  exit 1
+}
+
+command -v supervisorctl >/dev/null 2>&1 || {
+  echo "Command not found : supervisorctl"
+  echo "Please install supervisor : pip install supervisor"
+  exit 1
+}
+
+
+PROGRAM="cse"
+
+RUN_PATH=`cd $(dirname $0)/..;pwd`
+export RUN_PATH
+echo "program home : $RUN_PATH"
+
+mkdir -p $RUN_PATH/tmp
+
+#接收参数
+INTERFACE=$1
+shift
+
+#根据不同的参数选择不同的接口行为
+case "$INTERFACE" in
+	start)
+		supervisord -c $RUN_PATH/bin/supervisord.conf
+		RET=$?
+		echo -e "return value: ${RET}"
+		exit ${RET}
+		;;
+	stop)
+		supervisorctl -c $RUN_PATH/bin/supervisord.conf stop $PROGRAM 
+		supervisorctl -c $RUN_PATH/bin/supervisord.conf shutdown
+		RET=$?
+		echo -e "return value: ${RET}"
+		exit ${RET}
+		;;
+	restart)
+		supervisorctl -c $RUN_PATH/bin/supervisord.conf restart $PROGRAM 
+		RET=$?
+		echo -e "return value: ${RET}"
+		exit ${RET}
+		;;
+	*)
+		echo "Usage : $0 [start|stop|restart]"
+esac
